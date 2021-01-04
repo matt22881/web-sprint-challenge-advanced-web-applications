@@ -1,14 +1,14 @@
 import React, { useState } from "react";
- // eslint-disable-next-line
-import axios from "axios";
+import { axiosWithAuth as axios } from "./../utils/axiosWithAuth";
 import { v4 as uuid } from 'uuid';
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
+
+
 const ColorList = ({ colors, updateColors }) => {
-  console.log('colors: ', colors)
   const [ editing, setEditing ] = useState(false)
   const [ colorToEdit, setColorToEdit ] = useState(initialColor)
 
@@ -22,12 +22,37 @@ const ColorList = ({ colors, updateColors }) => {
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
-    axios.put('localhost:5000/api/colors/:id', {})
+    colorToEdit.id = uuid()
+    axios().put(`colors/${colorToEdit.id}`, colorToEdit)
+      .then(res => {
+        updateColors([ ...colors, colorToEdit ])
+        setColorToEdit(initialColor)
+        setEditing(false)
+      })
+      .catch(err => {
+            console.log('err: ', err)
+      })
+        
   }
 
   const deleteColor = color => {
+    
     // make a delete request to delete this color
+    axios()
+      .delete(`colors/${color.id}`)
+      .then(res => {
+        const newColors = colors.filter((col) => col.id !== color.id)
+        updateColors(newColors)
+      })
+      .catch(err => console.log(err));
   }
+
+  const deleteHandler = ((e) => {
+    e.persist();
+    const delColor = e.target.parentElement.innerText.split(' ')[ 1 ]
+    const delColorObjs = colors.filter((color) => (color.color === delColor))
+    deleteColor(delColorObjs[0])
+  })
 
   return (
     <div className="colors-wrap">
@@ -38,7 +63,7 @@ const ColorList = ({ colors, updateColors }) => {
             <span>
               <span className="delete" onClick={ e => {
                 e.stopPropagation()
-                deleteColor(color)
+                deleteHandler(e)
               }
               }>
                 x

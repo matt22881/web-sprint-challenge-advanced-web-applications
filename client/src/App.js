@@ -13,12 +13,13 @@ function App() {
         <Route exact path="/" component={Login} />
         {/* Build a PrivateRoute component that will */
           /* display BubblePage when you're authenticated */
-          (localStorage.token) ?
+          
             <Route exact path="/protected">
               <BubblePage 
                 
               />
-            </Route> : null
+            </Route>
+            
               }
       </div>
     </Router>
